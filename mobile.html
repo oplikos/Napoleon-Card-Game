@@ -5,88 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Napoleon Card Game - Mobile</title>
   <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    background-color: #2E7D32;
-    color: white;
-    font-family: sans-serif;
-    overflow-x: hidden;
-    width: 100vw;
-    height: 100vh;
-  }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #2E7D32;
+      color: white;
+      font-family: sans-serif;
+      overflow-x: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
 
-  h1 {
-    text-align: center;
-    font-size: 6vw;
-    margin: 10px 0;
-  }
-#board {
-  display: flex;
-  justify-content: center;
-  gap: 2vw;
-  padding-left: 72vw;  /* 1.5 * 24vw (card width) */
-  padding-right: 72vw;
-  overflow-x: visible;
-  width: 100vw;
-  box-sizing: border-box;
-}
+    h1 {
+      text-align: center;
+      font-size: 6vw;
+      margin: 10px 0;
+    }
 
-.column {
-  position: relative;
-  flex: 1;
-  min-width: 28vw;
-  height: calc(100vh - 10vw);
-  background-color: #388E3C;
-  border: 2px solid #1B5E20;
-  border-radius: 8px;
-  overflow: visible;
-}
+    #board {
+      display: flex;
+      justify-content: center;
+      gap: 2vw;
+      padding-left: 72vw;  /* 1.5 * 24vw (card width) */
+      padding-right: 72vw;
+      overflow-x: visible;
+      width: 100vw;
+      box-sizing: border-box;
+    }
 
+    .column {
+      position: relative;
+      flex: 1;
+      min-width: 28vw;
+      height: calc(100vh - 10vw);
+      background-color: #388E3C;
+      border: 2px solid #1B5E20;
+      border-radius: 8px;
+      overflow: visible;
+    }
 
-  .card {
-    width: 24vw;
-    height: 34vw;
-    background: white;
-    border-radius: 8px;
-    color: black;
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    font-size: 5vw;
-    box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
-    user-select: none;
-    touch-action: none;
-    padding: 1vw;
-    box-sizing: border-box;
-  }
+    .card {
+      width: 24vw;
+      height: 34vw;
+      background: white;
+      border-radius: 8px;
+      color: black;
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 5vw;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+      user-select: none;
+      touch-action: none;
+      padding: 1vw;
+      box-sizing: border-box;
+      transition: top 0.3s, left 0.3s;
+    }
 
-  .card.red {
-    color: red;
-  }
+    .card.red {
+      color: red;
+    }
 
-  .corner {
-    font-size: 5vw;
-    font-weight: bold;
-  }
+    .corner {
+      font-size: 5vw;
+      font-weight: bold;
+    }
 
-  .top-left {
-    align-self: flex-start;
-  }
+    .top-left {
+      align-self: flex-start;
+    }
 
-  .bottom-right {
-    align-self: flex-end;
-    transform: rotate(180deg);
-  }
+    .bottom-right {
+      align-self: flex-end;
+      transform: rotate(180deg);
+    }
 
-  .center-suit {
-    font-size: 10vw;
-    text-align: center;
-    pointer-events: none;
-  }
-</style>
-
+    .center-suit {
+      font-size: 10vw;
+      text-align: center;
+      pointer-events: none;
+      user-select: none;
+    }
+  </style>
 </head>
 <body>
   <h1>Napoleon</h1>
@@ -99,11 +100,12 @@
   <script>
     const suits = ['♠', '♥', '♦', '♣'];
     const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-    const cardWidth = 24;
-    const cardHeight = 34;
-    const shift = 8;
+    const cardWidth = 24; // vw units
+    const cardHeight = 34; // vw units
+    const verticalGap = 2; // vw units
+    const horizontalShift = 8; // vw units for stacking left/right
 
-    let boardRows = Array(5).fill(0).map(() => ({
+    let boardRows = Array.from({ length: 5 }, () => ({
       left: [], middle: [], right: []
     }));
 
@@ -128,14 +130,16 @@
 
       for (let i = 0; i < deck.length; i++) {
         const card = deck[i];
-        const target = dealToLeft ? 'left' : 'right';
+        const targetCol = dealToLeft ? 'left' : 'right';
 
         if (card.rank === 'A' && boardRows[rowIndex].middle.length === 0) {
           boardRows[rowIndex].middle.push(card);
           i++;
-          if (i < deck.length) boardRows[rowIndex][target].push(deck[i]);
+          if (i < deck.length) {
+            boardRows[rowIndex][targetCol].push(deck[i]);
+          }
         } else {
-          boardRows[rowIndex][target].push(card);
+          boardRows[rowIndex][targetCol].push(card);
         }
 
         dealToLeft = !dealToLeft;
@@ -145,6 +149,10 @@
     }
 
     dealCards();
+
+    const leftColDiv = document.getElementById('left-column');
+    const middleColDiv = document.getElementById('middle-column');
+    const rightColDiv = document.getElementById('right-column');
 
     function createCardElement(card, col, idx, row) {
       const div = document.createElement('div');
@@ -162,21 +170,23 @@
       div.dataset.col = col;
       div.dataset.index = idx;
 
-      let top = row * (cardHeight + 2);
-      let left = 5;
+      // Vertical positioning: cards stacked bottom to top (row 4 is bottom)
+      const topPos = (4 - row) * (cardHeight + verticalGap);
+      div.style.top = topPos + 'vw';
+
+      // Horizontal positioning based on column and stack index
       if (col === 'middle') {
-        left = 2;
+        div.style.left = (12 - cardWidth / 2) + 'vw'; // center horizontally approx
       } else if (col === 'left') {
-        left = 2 - idx * shift;
-      } else if (col === 'right') {
-        left = 2 + idx * shift;
+        div.style.left = (2 - idx * horizontalShift) + 'vw';
+      } else { // right
+        div.style.left = (2 + idx * horizontalShift) + 'vw';
       }
 
-      div.style.top = top + 'vw';
-      div.style.left = left + 'vw';
       div.style.zIndex = 1000 + idx;
       div.draggable = false;
 
+      // Enable touch drag only on top card of stack
       if (idx === boardRows[row][col].length - 1) {
         enableTouchDrag(div);
       }
@@ -184,144 +194,151 @@
       return div;
     }
 
-    function dragStart(e) {
-        const el = e.target.closest('.card');
-        draggedCardInfo = {
-        row: Number(el.dataset.row),
-        col: el.dataset.column,
-        stackIndex: Number(el.dataset.stackIndex),
-        card: {
-            suit: el.dataset.suit,
-            rank: el.dataset.rank,
-            value: ranks.indexOf(el.dataset.rank) + 1
+    let draggedCard = null;
+
+    function enableTouchDrag(cardEl) {
+      cardEl.addEventListener('touchstart', e => {
+        draggedCard = cardEl;
+        draggedCard.startX = e.touches[0].clientX;
+        draggedCard.startY = e.touches[0].clientY;
+        draggedCard.style.position = 'fixed';
+        draggedCard.style.zIndex = 9999;
+        draggedCard.style.transition = 'none';
+        e.preventDefault();
+      }, { passive: false });
+
+      cardEl.addEventListener('touchmove', e => {
+        if (!draggedCard) return;
+        const x = e.touches[0].clientX;
+        const y = e.touches[0].clientY;
+        draggedCard.style.left = (x - draggedCard.offsetWidth / 2) + 'px';
+        draggedCard.style.top = (y - draggedCard.offsetHeight / 2) + 'px';
+        e.preventDefault();
+      }, { passive: false });
+
+      cardEl.addEventListener('touchend', e => {
+        if (!draggedCard) return;
+
+        const touch = e.changedTouches[0];
+        const cols = ['left', 'middle', 'right'];
+        const colElements = cols.map(c => document.getElementById(c + '-column'));
+
+        let droppedCol = null;
+        let droppedRow = null;
+
+        for (let i = 0; i < colElements.length; i++) {
+          const rect = colElements[i].getBoundingClientRect();
+          if (touch.clientX >= rect.left && touch.clientX <= rect.right) {
+            droppedCol = cols[i];
+            droppedRow = 4 - Math.floor((touch.clientY - rect.top) / (cardHeight + verticalGap * (window.innerWidth / 100)));
+            if (droppedRow < 0) droppedRow = 0;
+            if (droppedRow > 4) droppedRow = 4;
+            break;
+          }
         }
-        };
-        e.dataTransfer.effectAllowed = "move";
+
+        if (droppedCol && isValidMove({
+          card: {
+            suit: draggedCard.dataset.suit,
+            rank: draggedCard.dataset.rank,
+            value: ranks.indexOf(draggedCard.dataset.rank) + 1
+          },
+          row: Number(draggedCard.dataset.row),
+          col: draggedCard.dataset.col,
+          stackIndex: Number(draggedCard.dataset.index)
+        }, droppedCol, droppedRow)) {
+          moveCard({
+            row: Number(draggedCard.dataset.row),
+            col: draggedCard.dataset.col,
+            stackIndex: Number(draggedCard.dataset.index)
+          }, droppedCol, droppedRow);
+        }
+
+        draggedCard.style.position = '';
+        draggedCard.style.zIndex = '';
+        draggedCard.style.transition = '';
+        draggedCard = null;
+        renderBoard();
+      }, { passive: false });
     }
 
-    [leftColDiv, middleColDiv, rightColDiv].forEach(colDiv => {
-        colDiv.addEventListener('dragover', e => e.preventDefault());
-        colDiv.addEventListener('drop', e => {
-        e.preventDefault();
-        if (!draggedCardInfo) return;
-        const targetCol = colDiv.dataset.col;
-
-        const rect = colDiv.getBoundingClientRect();
-        const y = e.clientY - rect.top;
-
-        let targetRow = 4 - Math.floor(y / cardHeight);
-        if (targetRow < 0) targetRow = 0;
-        if (targetRow > 4) targetRow = 4;
-
-        if (isValidMove(draggedCardInfo, targetCol, targetRow)) {
-            moveCard(draggedCardInfo, targetCol, targetRow);
-            renderBoard();
-        }
-        });
-    });
-
     function isValidMove(dragged, targetCol, targetRow) {
-        const movingCard = dragged.card;
-        const fromStack = boardRows[dragged.row][dragged.col];
-        if (dragged.stackIndex !== fromStack.length - 1) return false;
+      const movingCard = dragged.card;
+      const fromStack = boardRows[dragged.row][dragged.col];
+      if (dragged.stackIndex !== fromStack.length - 1) return false;
 
-        const targetStack = boardRows[targetRow][targetCol];
+      const targetStack = boardRows[targetRow][targetCol];
 
-        if (targetStack.length === 0) {
+      if (targetStack.length === 0) {
         // Middle empty stack accepts only Aces
         if (targetCol === 'middle') return movingCard.rank === 'A';
         return true;
-        } else {
+      } else {
         const topTargetCard = targetStack[targetStack.length - 1];
         if (topTargetCard.suit !== movingCard.suit) return false;
         const diff = Math.abs(ranks.indexOf(topTargetCard.rank) - ranks.indexOf(movingCard.rank));
         return diff === 1;
-        }
+      }
     }
 
     function moveCard(dragged, targetCol, targetRow) {
-        const fromStack = boardRows[dragged.row][dragged.col];
-        const movingCard = fromStack.pop();
-        boardRows[targetRow][targetCol].push(movingCard);
+      const fromStack = boardRows[dragged.row][dragged.col];
+      const movingCard = fromStack.pop();
+      boardRows[targetRow][targetCol].push(movingCard);
     }
 
     function renderBoard() {
-      document.querySelectorAll('.column').forEach(c => c.innerHTML = '');
+      [leftColDiv, middleColDiv, rightColDiv].forEach(colDiv => colDiv.innerHTML = '');
       for (let r = 0; r < 5; r++) {
         ['left', 'middle', 'right'].forEach(col => {
-          const div = document.getElementById(col + '-column');
+          const colDiv = document.getElementById(col + '-column');
           boardRows[r][col].forEach((card, i) => {
-            div.appendChild(createCardElement(card, col, i, r));
+            colDiv.appendChild(createCardElement(card, col, i, r));
           });
         });
       }
     }
 
-    let dragged = null;
+    // Add drag-and-drop support for desktop too (optional)
+    let draggedCardInfo = null;
 
-    function enableTouchDrag(cardEl) {
-      cardEl.addEventListener('touchstart', e => {
-        dragged = cardEl;
-        dragged.startX = e.touches[0].clientX;
-        dragged.startY = e.touches[0].clientY;
-        dragged.style.position = 'fixed';
-        dragged.style.zIndex = 9999;
+    document.querySelectorAll('.column').forEach(colDiv => {
+      colDiv.addEventListener('dragover', e => e.preventDefault());
+      colDiv.addEventListener('drop', e => {
         e.preventDefault();
-      });
+        if (!draggedCardInfo) return;
+        const targetCol = colDiv.dataset.col;
+        const rect = colDiv.getBoundingClientRect();
+        const y = e.clientY - rect.top;
+        let targetRow = 4 - Math.floor(y / (cardHeight * window.innerWidth / 100));
+        if (targetRow < 0) targetRow = 0;
+        if (targetRow > 4) targetRow = 4;
 
-      cardEl.addEventListener('touchmove', e => {
-        if (!dragged) return;
-        const x = e.touches[0].clientX;
-        const y = e.touches[0].clientY;
-        dragged.style.left = (x - cardEl.offsetWidth / 2) + 'px';
-        dragged.style.top = (y - cardEl.offsetHeight / 2) + 'px';
-      });
-
-      cardEl.addEventListener('touchend', e => {
-        if (!dragged) return;
-
-        // Calculate drop position relative to columns (example)
-        const touch = e.changedTouches[0];
-        let droppedOnCol = null;
-        let droppedOnRow = null;
-
-        const cols = ['left', 'middle', 'right'];
-        const colElements = cols.map(c => document.getElementById(c + '-column'));
-
-        for (let i = 0; i < colElements.length; i++) {
-            const rect = colElements[i].getBoundingClientRect();
-            if (touch.clientX >= rect.left && touch.clientX <= rect.right) {
-            droppedOnCol = cols[i];
-            droppedOnRow = 4 - Math.floor((touch.clientY - rect.top) / (cardHeight + 10));
-            if (droppedOnRow < 0) droppedOnRow = 0;
-            if (droppedOnRow > 4) droppedOnRow = 4;
-            break;
-            }
+        if (isValidMove(draggedCardInfo, targetCol, targetRow)) {
+          moveCard(draggedCardInfo, targetCol, targetRow);
+          renderBoard();
         }
+        draggedCardInfo = null;
+      });
+    });
 
-        if (droppedOnCol && isValidMove({
-            card: {
-            suit: dragged.dataset.suit,
-            rank: dragged.dataset.rank,
-            value: ranks.indexOf(dragged.dataset.rank) + 1
-            },
-            row: Number(dragged.dataset.row),
-            col: dragged.dataset.col,
-            stackIndex: Number(dragged.dataset.index)
-        }, droppedOnCol, droppedOnRow)) {
-            // Move card in data
-            const fromStack = boardRows[Number(dragged.dataset.row)][dragged.dataset.col];
-            const movingCard = fromStack.pop();
-            boardRows[droppedOnRow][droppedOnCol].push(movingCard);
+    function onDragStart(e) {
+      const el = e.target.closest('.card');
+      if (!el) return;
+      draggedCardInfo = {
+        row: Number(el.dataset.row),
+        col: el.dataset.col,
+        stackIndex: Number(el.dataset.index),
+        card: {
+          suit: el.dataset.suit,
+          rank: el.dataset.rank,
+          value: ranks.indexOf(el.dataset.rank) + 1
         }
-
-        dragged.style.position = '';
-        dragged.style.zIndex = '';
-        dragged = null;
-        renderBoard();
-        });
-
+      };
+      e.dataTransfer.effectAllowed = "move";
     }
+
+    document.body.addEventListener('dragstart', onDragStart);
 
     renderBoard();
   </script>
