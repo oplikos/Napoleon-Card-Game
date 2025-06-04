@@ -67,50 +67,89 @@
     pointer-events: none;
   }
   
-    
-    #controls {
-        display: flex;
-        justify-content: center;
-        gap: 2vw;
-        margin-bottom: 1vw;
-    }
+ 
+    @media (min-width: 768px) {
+  #controls button {
+    font-size: 18px;
+    padding: 10px 20px;
+  }
 
-    #controls button {
-        padding: 1vw 2vw;
-        font-size: 4vw;
-        border: none;
-        border-radius: 8px;
-        background: #ffffffcc;
-        color: #2E7D32;
-        font-weight: bold;
-        cursor: pointer;
-        transition: transform 0.2s;
-    }
+  .column {
+    width: 160px;
+    height: 800px;
+  }
 
-    #controls button:hover {
-        transform: scale(1.1);
-    }
+  .card {
+    width: 80px;
+    height: 112px;
+    font-size: 22px;
+  }
 
-    #solved-message {
-        position: absolute;
-        top: 45%;
-        left: 50%;
-        transform: translate(-50%, -50%) scale(0);
-        font-size: 8vw;
-        font-weight: bold;
-        color: gold;
-        text-shadow: 2px 2px 5px #000;
-        animation: solvedAnim 1s ease-out forwards;
-        display: none;
-        z-index: 9999;
-    }
+  .corner {
+    font-size: 18px;
+  }
 
-    @keyframes solvedAnim {
-        to {
-            transform: translate(-50%, -50%) scale(1.2);
-            opacity: 1;
-        }
-    }
+  .center-suit {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 767px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  #board {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .column {
+    width: 16.6666vw; /* 1/6 of screen */
+    height: auto;
+    min-height: 600px;
+    position: relative;
+    border: 1px solid #1B5E20;
+    background-color: #388E3C;
+  }
+
+  #left-column {
+    flex: 1;
+  }
+
+  #middle-column {
+    flex: 4;
+    min-width: 66.6666vw; /* 4/6 width */
+    max-width: 66.6666vw;
+  }
+
+  #right-column {
+    flex: 1;
+  }
+
+  .card {
+    width: 14vw;
+    height: 20vw;
+    font-size: 4vw;
+  }
+
+  .corner {
+    font-size: 3vw;
+  }
+
+  .center-suit {
+    font-size: 6vw;
+  }
+
+  #controls button {
+    font-size: 5vw;
+    padding: 2vw 3vw;
+  }
+}
+
 </style>
 </head>
 <body>
