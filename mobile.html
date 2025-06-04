@@ -9,6 +9,7 @@
       margin: 0;
       padding: 0;
       background-color: #2E7D32;
+      color: white;
       font-family: sans-serif;
       overflow: hidden;
       width: 100vw;
@@ -18,35 +19,39 @@
     h1 {
       text-align: center;
       font-size: 5vw;
-      margin: 1vh 0;
-      color: white;
+      margin: 10px 0;
     }
 
-    /* Container with 1/6 gap on each side */
-    #board-container {
+    #game-wrapper {
+      display: flex;
       width: 100vw;
       height: calc(100vh - 8vw);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      box-sizing: border-box;
+    }
+
+    .side-gap {
+      flex: 1; /* 1/6 of the screen */
+      border: 2px dashed rgba(255, 255, 255, 0.4); /* visible gap border */
     }
 
     #board {
+      flex: 4; /* 4/6 of the screen */
       display: flex;
-      justify-content: space-between;
+      justify-content: space-around;
       align-items: flex-end;
-      width: 66.66vw; /* 4/6 of screen */
       height: 100%;
       box-sizing: border-box;
+      position: relative;
     }
 
     .column {
       position: relative;
-      width: 22vw; /* 1/3 of 66vw */
+      flex: 1;
       height: 100%;
       background-color: #388E3C;
-      border-radius: 8px;
       border: 2px solid #1B5E20;
+      border-radius: 8px;
+      margin: 0 0.5vw;
       overflow: visible;
     }
 
