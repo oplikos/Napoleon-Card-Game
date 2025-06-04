@@ -184,6 +184,67 @@
       return div;
     }
 
+    function dragStart(e) {
+        const el = e.target.closest('.card');
+        draggedCardInfo = {
+        row: Number(el.dataset.row),
+        col: el.dataset.column,
+        stackIndex: Number(el.dataset.stackIndex),
+        card: {
+            suit: el.dataset.suit,
+            rank: el.dataset.rank,
+            value: ranks.indexOf(el.dataset.rank) + 1
+        }
+        };
+        e.dataTransfer.effectAllowed = "move";
+    }
+
+    [leftColDiv, middleColDiv, rightColDiv].forEach(colDiv => {
+        colDiv.addEventListener('dragover', e => e.preventDefault());
+        colDiv.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!draggedCardInfo) return;
+        const targetCol = colDiv.dataset.col;
+
+        const rect = colDiv.getBoundingClientRect();
+        const y = e.clientY - rect.top;
+
+        let targetRow = 4 - Math.floor(y / cardHeight);
+        if (targetRow < 0) targetRow = 0;
+        if (targetRow > 4) targetRow = 4;
+
+        if (isValidMove(draggedCardInfo, targetCol, targetRow)) {
+            moveCard(draggedCardInfo, targetCol, targetRow);
+            renderBoard();
+        }
+        });
+    });
+
+    function isValidMove(dragged, targetCol, targetRow) {
+        const movingCard = dragged.card;
+        const fromStack = boardRows[dragged.row][dragged.col];
+        if (dragged.stackIndex !== fromStack.length - 1) return false;
+
+        const targetStack = boardRows[targetRow][targetCol];
+
+        if (targetStack.length === 0) {
+        // Middle empty stack accepts only Aces
+        if (targetCol === 'middle') return movingCard.rank === 'A';
+        return true;
+        } else {
+        const topTargetCard = targetStack[targetStack.length - 1];
+        if (topTargetCard.suit !== movingCard.suit) return false;
+        const diff = Math.abs(ranks.indexOf(topTargetCard.rank) - ranks.indexOf(movingCard.rank));
+        return diff === 1;
+        }
+    }
+
+    function moveCard(dragged, targetCol, targetRow) {
+        const fromStack = boardRows[dragged.row][dragged.col];
+        const movingCard = fromStack.pop();
+        boardRows[targetRow][targetCol].push(movingCard);
+    }
+
     function renderBoard() {
       document.querySelectorAll('.column').forEach(c => c.innerHTML = '');
       for (let r = 0; r < 5; r++) {
@@ -217,9 +278,49 @@
       });
 
       cardEl.addEventListener('touchend', e => {
+        if (!dragged) return;
+
+        // Calculate drop position relative to columns (example)
+        const touch = e.changedTouches[0];
+        let droppedOnCol = null;
+        let droppedOnRow = null;
+
+        const cols = ['left', 'middle', 'right'];
+        const colElements = cols.map(c => document.getElementById(c + '-column'));
+
+        for (let i = 0; i < colElements.length; i++) {
+            const rect = colElements[i].getBoundingClientRect();
+            if (touch.clientX >= rect.left && touch.clientX <= rect.right) {
+            droppedOnCol = cols[i];
+            droppedOnRow = 4 - Math.floor((touch.clientY - rect.top) / (cardHeight + 10));
+            if (droppedOnRow < 0) droppedOnRow = 0;
+            if (droppedOnRow > 4) droppedOnRow = 4;
+            break;
+            }
+        }
+
+        if (droppedOnCol && isValidMove({
+            card: {
+            suit: dragged.dataset.suit,
+            rank: dragged.dataset.rank,
+            value: ranks.indexOf(dragged.dataset.rank) + 1
+            },
+            row: Number(dragged.dataset.row),
+            col: dragged.dataset.col,
+            stackIndex: Number(dragged.dataset.index)
+        }, droppedOnCol, droppedOnRow)) {
+            // Move card in data
+            const fromStack = boardRows[Number(dragged.dataset.row)][dragged.dataset.col];
+            const movingCard = fromStack.pop();
+            boardRows[droppedOnRow][droppedOnCol].push(movingCard);
+        }
+
+        dragged.style.position = '';
+        dragged.style.zIndex = '';
         dragged = null;
-        renderBoard(); // Reset position for now
-      });
+        renderBoard();
+        });
+
     }
 
     renderBoard();

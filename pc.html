@@ -252,6 +252,8 @@
     const targetStack = boardRows[targetRow][targetCol];
 
     if (targetStack.length === 0) {
+      // Middle empty stack accepts only Aces
+      if (targetCol === 'middle') return movingCard.rank === 'A';
       return true;
     } else {
       const topTargetCard = targetStack[targetStack.length - 1];
