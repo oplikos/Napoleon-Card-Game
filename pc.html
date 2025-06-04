@@ -66,11 +66,63 @@
     user-select: none;
     pointer-events: none;
   }
+  
+    
+    #controls {
+        display: flex;
+        justify-content: center;
+        gap: 2vw;
+        margin-bottom: 1vw;
+    }
+
+    #controls button {
+        padding: 1vw 2vw;
+        font-size: 4vw;
+        border: none;
+        border-radius: 8px;
+        background: #ffffffcc;
+        color: #2E7D32;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    #controls button:hover {
+        transform: scale(1.1);
+    }
+
+    #solved-message {
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        font-size: 8vw;
+        font-weight: bold;
+        color: gold;
+        text-shadow: 2px 2px 5px #000;
+        animation: solvedAnim 1s ease-out forwards;
+        display: none;
+        z-index: 9999;
+    }
+
+    @keyframes solvedAnim {
+        to {
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 1;
+        }
+    }
 </style>
 </head>
 <body>
 
 <h1>Napoleon Card Game - PC</h1>
+<div id="controls">
+  <button onclick="undoLastMove()">⬅️ Back</button>
+  <button onclick="resetToInitial()">🔄 Reset</button>
+  <button onclick="restartGame()">🔁 Restart</button>
+</div>
+<div id="solved-message">SOLVED!!</div>
+
 <div id="board">
   <div id="left-column" class="column" data-col="left"></div>
   <div id="middle-column" class="column" data-col="middle"></div>
@@ -78,6 +130,9 @@
 </div>
 
 <script>
+  let moveHistory = [];
+  let initialBoard = null;
+
   const suits = ['♠', '♥', '♦', '♣'];
   const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
@@ -109,35 +164,33 @@
     right: []
   }));
 
-  function dealCards() {
+    function dealCards() {
     const deck = shuffle(createDeck());
     let rowIndex = 0;
     let dealToLeft = true;
 
     for (let i = 0; i < deck.length; i++) {
-      let card = deck[i];
-      let intendedCol = dealToLeft ? 'left' : 'right';
+        const card = deck[i];
+        const targetCol = dealToLeft ? 'left' : 'right';
 
-      if (card.rank === 'A') {
-        if (boardRows[rowIndex].middle.length === 0) {
-          boardRows[rowIndex].middle.push(card);
-          i++;
-          if (i < deck.length) {
-            let nextCard = deck[i];
-            boardRows[rowIndex][intendedCol].push(nextCard);
-          }
-        } else {
-          boardRows[rowIndex][intendedCol].push(card);
+        if (card.rank === 'A' && boardRows[rowIndex].middle.length === 0) {
+        boardRows[rowIndex].middle.push(card);
+        i++;
+        if (i < deck.length) {
+            boardRows[rowIndex][targetCol].push(deck[i]);
         }
-      } else {
-        boardRows[rowIndex][intendedCol].push(card);
-      }
+        } else {
+        boardRows[rowIndex][targetCol].push(card);
+        }
 
-      dealToLeft = !dealToLeft;
-      if (!dealToLeft) rowIndex++;
-      if (rowIndex >= 5) rowIndex = 0;
+        dealToLeft = !dealToLeft;
+        if (!dealToLeft) rowIndex++;
+        if (rowIndex >= 5) rowIndex = 0;
     }
-  }
+
+    // Deep copy for reset later
+    initialBoard = JSON.parse(JSON.stringify(boardRows));
+    }
 
   dealCards();
 
@@ -237,10 +290,21 @@
       if (targetRow < 0) targetRow = 0;
       if (targetRow > 4) targetRow = 4;
 
-      if (isValidMove(draggedCardInfo, targetCol, targetRow)) {
-        moveCard(draggedCardInfo, targetCol, targetRow);
-        renderBoard();
-      }
+  if (isValidMove(draggedCardInfo, targetCol, targetRow)) {
+    const fromCol = draggedCardInfo.col;
+    const toCol = targetCol;
+    const row = targetRow;
+
+    const stack = boardRows[draggedCardInfo.row][fromCol];
+    const card = stack.pop();
+
+    boardRows[row][toCol].push(card);
+    moveHistory.push({ fromCol, toCol, row, card });
+    
+    renderBoard();
+    checkSolved();
+  }
+
     });
   });
 
@@ -263,11 +327,64 @@
     }
   }
 
-  function moveCard(dragged, targetCol, targetRow) {
-    const fromStack = boardRows[dragged.row][dragged.col];
-    const movingCard = fromStack.pop();
-    boardRows[targetRow][targetCol].push(movingCard);
-  }
+      function moveCard(fromCol, toCol, row) {
+        const stack = boardRows[row][fromCol];
+        if (stack.length === 0) return;
+
+        const card = stack.pop();
+        boardRows[row][toCol].push(card);
+
+        moveHistory.push({ fromCol, toCol, row, card });
+        renderBoard();
+        checkSolved();
+    }
+
+    function undoLastMove() {
+        const last = moveHistory.pop();
+        if (!last) return;
+
+        const { fromCol, toCol, row, card } = last;
+        const toStack = boardRows[row][toCol];
+        const popped = toStack.pop();
+
+        if (popped.rank === card.rank && popped.suit === card.suit) {
+            boardRows[row][fromCol].push(card);
+            renderBoard();
+        }
+    }
+    function resetToInitial() {
+        boardRows = JSON.parse(JSON.stringify(initialBoard));
+        moveHistory = [];
+        renderBoard();
+        hideSolved();
+    }
+    
+    function restartGame() {
+        location.reload();
+    }
+    function checkSolved() {
+        const solved = boardRows.every(row =>
+            row.left.length === 0 &&
+            row.right.length === 0 &&
+            row.middle.length > 0
+        );
+
+        if (solved) {
+            showSolved();
+        }
+    }
+    function showSolved() {
+        const msg = document.getElementById('solved-message');
+        msg.style.display = 'block';
+        msg.style.animation = 'solvedAnim 1s ease-out forwards';
+    }
+
+    function hideSolved() {
+        const msg = document.getElementById('solved-message');
+        msg.style.display = 'none';
+        msg.style.animation = 'none';
+    }
+
 
   function renderBoard() {
     leftColDiv.innerHTML = '';
