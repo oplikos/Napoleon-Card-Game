@@ -1,292 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Napoleon Card Game - Final Touches</title>
-<style>
-  body {
-    background-color: #2E7D32;
-    color: white;
-    font-family: sans-serif;
-    text-align: center;
-    margin: 20px;
-  }
-  #board {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    margin-top: 30px;
-  }
-  .column {
-    position: relative;
-    width: 200px;
-    height: 800px;
-    border: 2px solid #1B5E20;
-    background-color: #388E3C;
-    border-radius: 8px;
-    padding-top: 20px;
-  }
-  .card {
-    width: 100px;
-    height: 140px;
-    background: white;
-    border-radius: 8px;
-    color: black;
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    font-size: 28px;
-    box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
-    user-select: none;
-    cursor: pointer;
-    transition: top 0.2s, left 0.2s;
-    padding: 5px;
-    box-sizing: border-box;
-  }
-  .card.red {
-    color: red;
-  }
-  .corner {
-    font-size: 24px;      /* bigger font for corner numbers */
-    font-weight: bold;
-    line-height: 1;
-  }
-  .top-left {
-    align-self: flex-start;
-  }
-  .bottom-right {
-    align-self: flex-end;
-    /* transform: rotate(180deg); */
-  }
-  .center-suit {
-    font-size: 64px;
-    text-align: center;
-    line-height: 1;
-    user-select: none;
-    pointer-events: none;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to Napoleon Card Game</title>
+  <style>
+    body {
+      background-color: #1e3d59;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      font-size: 1.2rem;
+      max-width: 800px;
+      margin: 0 auto 1rem;
+    }
+
+    ul {
+      list-style-type: disc;
+      padding-left: 2rem;
+      text-align: left;
+      max-width: 700px;
+      margin: 0 auto 2rem;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      background-color: #4CAF50;
+      border: none;
+      padding: 1rem 2rem;
+      text-decoration: none;
+      color: white;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .button:hover {
+      background-color: #45a049;
+    }
+  </style>
 </head>
 <body>
 
-<h1>Napoleon Card Game - Final Touches</h1>
-<div id="board">
-  <div id="left-column" class="column" data-col="left"></div>
-  <div id="middle-column" class="column" data-col="middle"></div>
-  <div id="right-column" class="column" data-col="right"></div>
-</div>
+  <h1>Welcome to Napoleon</h1>
+  <p>A classic solitaire-style card game with a twist. Arrange the cards by suit and order with clever moves. Here's how it works:</p>
 
-<script>
-  const suits = ['♠', '♥', '♦', '♣'];
-  const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+  <ul>
+    <li>The game board has 3 columns and 5 rows.</li>
+    <li>Cards are dealt row-by-row: first to the left column, then the right.</li>
+    <li>If an Ace appears and the middle column of that row is empty, the Ace goes to the middle instead. A new card replaces it in the original spot.</li>
+    <li>Only the top card in any stack can be moved.</li>
+    <li>You can only move a card onto another card of the same suit and in sequence (+1 or -1).</li>
+    <li>Empty rows can accept any card.</li>
+    <li>Cards in the middle (Ace stack) are placed directly on top of each other with no offset.</li>
+  </ul>
 
-  function createDeck() {
-    let deck = [];
-    for (let suit of suits) {
-      for (let i = 0; i < ranks.length; i++) {
-        deck.push({ suit, rank: ranks[i], value: i + 1 });
-      }
-    }
-    return deck;
-  }
-
-  function shuffle(deck) {
-    for (let i = deck.length -1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i +1));
-      [deck[i], deck[j]] = [deck[j], deck[i]];
-    }
-    return deck;
-  }
-
-  const cardWidth = 100;
-  const cardHeight = 140;
-  const horizontalShift = cardWidth / 3;
-
-  let boardRows = Array(5).fill(0).map(() => ({
-    left: [],
-    middle: [],
-    right: []
-  }));
-
-  function dealCards() {
-    const deck = shuffle(createDeck());
-    let rowIndex = 0;
-    let dealToLeft = true;
-
-    for (let i = 0; i < deck.length; i++) {
-      let card = deck[i];
-      let intendedCol = dealToLeft ? 'left' : 'right';
-
-      if (card.rank === 'A') {
-        if (boardRows[rowIndex].middle.length === 0) {
-          boardRows[rowIndex].middle.push(card);
-          i++;
-          if (i < deck.length) {
-            let nextCard = deck[i];
-            boardRows[rowIndex][intendedCol].push(nextCard);
-          }
-        } else {
-          boardRows[rowIndex][intendedCol].push(card);
-        }
-      } else {
-        boardRows[rowIndex][intendedCol].push(card);
-      }
-
-      dealToLeft = !dealToLeft;
-      if (!dealToLeft) rowIndex++;
-      if (rowIndex >= 5) rowIndex = 0;
-    }
-  }
-
-  dealCards();
-
-  const leftColDiv = document.getElementById('left-column');
-  const middleColDiv = document.getElementById('middle-column');
-  const rightColDiv = document.getElementById('right-column');
-
-  function createCardElement(card, colName, stackIndex, rowIndex) {
-    const cardDiv = document.createElement('div');
-    cardDiv.className = 'card';
-    if (card.suit === '♥' || card.suit === '♦') cardDiv.classList.add('red');
-
-    // Create corner elements
-    const topLeft = document.createElement('div');
-    topLeft.className = 'corner top-left';
-    topLeft.textContent = card.rank + card.suit;
-
-    const bottomRight = document.createElement('div');
-    bottomRight.className = 'corner bottom-right';
-    bottomRight.textContent = card.rank + card.suit;
-
-    // Center suit symbol
-    const centerSuit = document.createElement('div');
-    centerSuit.className = 'center-suit';
-    centerSuit.textContent = card.suit;
-
-    cardDiv.appendChild(topLeft);
-    cardDiv.appendChild(centerSuit);
-    cardDiv.appendChild(bottomRight);
-
-    cardDiv.dataset.suit = card.suit;
-    cardDiv.dataset.rank = card.rank;
-    cardDiv.dataset.column = colName;
-    cardDiv.dataset.row = rowIndex;
-    cardDiv.dataset.stackIndex = stackIndex;
-
-     const verticalGap = 10;  // gap between rows
-    let verticalPos = (4 - rowIndex) * (cardHeight + verticalGap);
-
-    if (colName === 'middle') {
-      // stack exactly on top of each other with no shift
-      cardDiv.style.top = verticalPos + 'px';
-      cardDiv.style.left = (100 - cardWidth / 2) + 'px';
-      cardDiv.style.zIndex = 1000 + stackIndex;
-    } else {
-      cardDiv.style.top = verticalPos + 'px';
-      if (colName === 'left') {
-        cardDiv.style.left = 10 - stackIndex * horizontalShift + 'px';
-      } else {
-        cardDiv.style.left = 10 + stackIndex * horizontalShift + 'px';
-      }
-      cardDiv.style.zIndex = 1000 + stackIndex;
-    }
-
-    // Only the top card in stack is draggable
-    const stack = boardRows[rowIndex][colName];
-    const isTopCard = (stackIndex === stack.length - 1);
-    cardDiv.draggable = isTopCard;
-    cardDiv.style.cursor = isTopCard ? 'pointer' : 'default';
-    cardDiv.style.opacity = '1';
-
-    if (isTopCard) {
-      cardDiv.addEventListener('dragstart', dragStart);
-    }
-
-    return cardDiv;
-  }
-
-  let draggedCardInfo = null;
-
-  function dragStart(e) {
-    const el = e.target.closest('.card');
-    draggedCardInfo = {
-      row: Number(el.dataset.row),
-      col: el.dataset.column,
-      stackIndex: Number(el.dataset.stackIndex),
-      card: {
-        suit: el.dataset.suit,
-        rank: el.dataset.rank,
-        value: ranks.indexOf(el.dataset.rank) + 1
-      }
-    };
-    e.dataTransfer.effectAllowed = "move";
-  }
-
-  [leftColDiv, middleColDiv, rightColDiv].forEach(colDiv => {
-    colDiv.addEventListener('dragover', e => e.preventDefault());
-    colDiv.addEventListener('drop', e => {
-      e.preventDefault();
-      if (!draggedCardInfo) return;
-      const targetCol = colDiv.dataset.col;
-
-      const rect = colDiv.getBoundingClientRect();
-      const y = e.clientY - rect.top;
-
-      let targetRow = 4 - Math.floor(y / cardHeight);
-      if (targetRow < 0) targetRow = 0;
-      if (targetRow > 4) targetRow = 4;
-
-      if (isValidMove(draggedCardInfo, targetCol, targetRow)) {
-        moveCard(draggedCardInfo, targetCol, targetRow);
-        renderBoard();
-      }
-    });
-  });
-
-  function isValidMove(dragged, targetCol, targetRow) {
-    const movingCard = dragged.card;
-    const fromStack = boardRows[dragged.row][dragged.col];
-    if (dragged.stackIndex !== fromStack.length - 1) return false;
-
-    const targetStack = boardRows[targetRow][targetCol];
-
-    if (targetStack.length === 0) {
-      return true;
-    } else {
-      const topTargetCard = targetStack[targetStack.length - 1];
-      if (topTargetCard.suit !== movingCard.suit) return false;
-      const diff = Math.abs(ranks.indexOf(topTargetCard.rank) - ranks.indexOf(movingCard.rank));
-      return diff === 1;
-    }
-  }
-
-  function moveCard(dragged, targetCol, targetRow) {
-    const fromStack = boardRows[dragged.row][dragged.col];
-    const movingCard = fromStack.pop();
-    boardRows[targetRow][targetCol].push(movingCard);
-  }
-
-  function renderBoard() {
-    leftColDiv.innerHTML = '';
-    middleColDiv.innerHTML = '';
-    rightColDiv.innerHTML = '';
-
-    for (let row = 0; row < 5; row++) {
-      boardRows[row].left.forEach((card, idx) => {
-        leftColDiv.appendChild(createCardElement(card, 'left', idx, row));
-      });
-      boardRows[row].middle.forEach((card, idx) => {
-        middleColDiv.appendChild(createCardElement(card, 'middle', idx, row));
-      });
-      boardRows[row].right.forEach((card, idx) => {
-        rightColDiv.appendChild(createCardElement(card, 'right', idx, row));
-      });
-    }
-  }
-
-  renderBoard();
-</script>
+  <div class="button-container">
+    <a href="pc.html" class="button">Play on Desktop</a>
+    <a href="mobile.html" class="button">Play on Mobile</a>
+  </div>
 
 </body>
 </html>

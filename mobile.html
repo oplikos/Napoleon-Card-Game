@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Napoleon Card Game - Mobile</title>
+  <style>
+    body {
+      background-color: #2E7D32;
+      color: white;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    h1 {
+      text-align: center;
+      font-size: 6vw;
+      margin: 10px 0;
+    }
+    #board {
+      display: flex;
+      justify-content: center;
+      gap: 5vw;
+      padding: 10px;
+      flex-wrap: wrap;
+    }
+    .column {
+      position: relative;
+      width: 28vw;
+      height: 100vh;
+      border: 2px solid #1B5E20;
+      background-color: #388E3C;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .card {
+      width: 24vw;
+      height: 34vw;
+      background: white;
+      border-radius: 8px;
+      color: black;
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 5vw;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+      user-select: none;
+      touch-action: none;
+      padding: 1vw;
+      box-sizing: border-box;
+    }
+    .card.red {
+      color: red;
+    }
+    .corner {
+      font-size: 5vw;
+      font-weight: bold;
+    }
+    .top-left {
+      align-self: flex-start;
+    }
+    .bottom-right {
+      align-self: flex-end;
+      transform: rotate(180deg);
+    }
+    .center-suit {
+      font-size: 10vw;
+      text-align: center;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Napoleon</h1>
+  <div id="board">
+    <div id="left-column" class="column" data-col="left"></div>
+    <div id="middle-column" class="column" data-col="middle"></div>
+    <div id="right-column" class="column" data-col="right"></div>
+  </div>
+
+  <script>
+    const suits = ['♠', '♥', '♦', '♣'];
+    const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+    const cardWidth = 24;
+    const cardHeight = 34;
+    const shift = 8;
+
+    let boardRows = Array(5).fill(0).map(() => ({
+      left: [], middle: [], right: []
+    }));
+
+    function createDeck() {
+      return suits.flatMap(suit =>
+        ranks.map((rank, i) => ({ suit, rank, value: i + 1 }))
+      );
+    }
+
+    function shuffle(deck) {
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      return deck;
+    }
+
+    function dealCards() {
+      const deck = shuffle(createDeck());
+      let rowIndex = 0;
+      let dealToLeft = true;
+
+      for (let i = 0; i < deck.length; i++) {
+        const card = deck[i];
+        const target = dealToLeft ? 'left' : 'right';
+
+        if (card.rank === 'A' && boardRows[rowIndex].middle.length === 0) {
+          boardRows[rowIndex].middle.push(card);
+          i++;
+          if (i < deck.length) boardRows[rowIndex][target].push(deck[i]);
+        } else {
+          boardRows[rowIndex][target].push(card);
+        }
+
+        dealToLeft = !dealToLeft;
+        if (!dealToLeft) rowIndex++;
+        if (rowIndex >= 5) rowIndex = 0;
+      }
+    }
+
+    dealCards();
+
+    function createCardElement(card, col, idx, row) {
+      const div = document.createElement('div');
+      div.className = 'card';
+      if (card.suit === '♥' || card.suit === '♦') div.classList.add('red');
+
+      div.innerHTML = `
+        <div class="corner top-left">${card.rank}${card.suit}</div>
+        <div class="center-suit">${card.suit}</div>
+        <div class="corner bottom-right">${card.rank}${card.suit}</div>
+      `;
+      div.dataset.rank = card.rank;
+      div.dataset.suit = card.suit;
+      div.dataset.row = row;
+      div.dataset.col = col;
+      div.dataset.index = idx;
+
+      let top = row * (cardHeight + 2);
+      let left = 5;
+      if (col === 'middle') {
+        left = 2;
+      } else if (col === 'left') {
+        left = 2 - idx * shift;
+      } else if (col === 'right') {
+        left = 2 + idx * shift;
+      }
+
+      div.style.top = top + 'vw';
+      div.style.left = left + 'vw';
+      div.style.zIndex = 1000 + idx;
+      div.draggable = false;
+
+      if (idx === boardRows[row][col].length - 1) {
+        enableTouchDrag(div);
+      }
+
+      return div;
+    }
+
+    function renderBoard() {
+      document.querySelectorAll('.column').forEach(c => c.innerHTML = '');
+      for (let r = 0; r < 5; r++) {
+        ['left', 'middle', 'right'].forEach(col => {
+          const div = document.getElementById(col + '-column');
+          boardRows[r][col].forEach((card, i) => {
+            div.appendChild(createCardElement(card, col, i, r));
+          });
+        });
+      }
+    }
+
+    let dragged = null;
+
+    function enableTouchDrag(cardEl) {
+      cardEl.addEventListener('touchstart', e => {
+        dragged = cardEl;
+        dragged.startX = e.touches[0].clientX;
+        dragged.startY = e.touches[0].clientY;
+        dragged.style.position = 'fixed';
+        dragged.style.zIndex = 9999;
+        e.preventDefault();
+      });
+
+      cardEl.addEventListener('touchmove', e => {
+        if (!dragged) return;
+        const x = e.touches[0].clientX;
+        const y = e.touches[0].clientY;
+        dragged.style.left = (x - cardEl.offsetWidth / 2) + 'px';
+        dragged.style.top = (y - cardEl.offsetHeight / 2) + 'px';
+      });
+
+      cardEl.addEventListener('touchend', e => {
+        dragged = null;
+        renderBoard(); // Reset position for now
+      });
+    }
+
+    renderBoard();
+  </script>
+</body>
+</html>
