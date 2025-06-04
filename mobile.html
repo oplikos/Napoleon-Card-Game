@@ -6,87 +6,88 @@
   <title>Napoleon Card Game - Mobile</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      background-color: #2E7D32;
-      color: white;
-      font-family: sans-serif;
-      overflow-x: hidden;
-      width: 100vw;
-      height: 100vh;
+        margin: 0;
+        padding: 0;
+        background-color: #2E7D32;
+        color: white;
+        font-family: sans-serif;
+        overflow: hidden;
+        width: 100vw; /* Screen width is 100% of viewport */
+        height: 100vh; /* Screen height is 100% of viewport */
     }
 
     h1 {
-      text-align: center;
-      font-size: 6vw;
-      margin: 10px 0;
+        text-align: center;
+        font-size: 6vw; /* Scales with screen width */
+        margin: 10px 0;
     }
 
     #board {
-      display: flex;
-      justify-content: center;
-      gap: 2vw;
-      padding-left: 72vw;  /* 1.5 * 24vw (card width) */
-      padding-right: 72vw;
-      overflow-x: visible;
-      width: 260vw;
-      box-sizing: border-box;
+        display: flex;
+        justify-content: space-around; /* Adds gaps between and around columns */
+        align-items: flex-end;
+        width: 100vw; /* Full screen width */
+        height: calc(100vh - 12vw); /* Full screen height minus space for title */
+        box-sizing: border-box;
+        padding: 0 4vw; /* Left and right gaps from screen edge */
     }
 
     .column {
-      position: relative;
-      flex: 1;
-      min-width: 28vw;
-      height: calc(100vh - 10vw);
-      background-color: #388E3C;
-      border: 2px solid #1B5E20;
-      border-radius: 8px;
-      overflow: visible;
+        position: relative;
+        flex: 1 1 30vw; /* Grow/shrink columns responsively */
+        max-width: 30vw; /* Max column width */
+        height: 100%;
+        background-color: #388E3C;
+        border: 2px solid #1B5E20;
+        border-radius: 8px;
+        margin: 0 1vw;
+        overflow: visible;
     }
 
     .card {
-      width: 24vw;
-      height: 34vw;
-      background: white;
-      border-radius: 8px;
-      color: black;
-      position: absolute;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      font-size: 5vw;
-      box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
-      user-select: none;
-      touch-action: none;
-      padding: 1vw;
-      box-sizing: border-box;
-      transition: top 0.3s, left 0.3s;
+        width: 24vw;      /* Card width in vw units – controls overall scaling */
+        height: 34vw;     /* Card height in vw units – controls vertical scaling */
+        background: white;
+        border-radius: 8px;
+        color: black;
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        font-size: 5vw;    /* Card font scales with screen */
+        box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+        user-select: none;
+        touch-action: none;
+        padding: 1vw;
+        box-sizing: border-box;
+        transition: top 0.3s, left 0.3s;
     }
 
     .card.red {
-      color: red;
+        color: red;
     }
 
     .corner {
-      font-size: 5vw;
-      font-weight: bold;
+        font-size: 5vw; /* Font size in card corners */
+        font-weight: bold;
     }
 
     .top-left {
-      align-self: flex-start;
+        align-self: flex-start;
     }
 
     .bottom-right {
-      align-self: flex-end;
-      transform: rotate(180deg);
+        align-self: flex-end;
+        transform: rotate(180deg);
     }
 
     .center-suit {
-      font-size: 10vw;
-      text-align: center;
-      pointer-events: none;
-      user-select: none;
+        font-size: 10vw; /* Suit in center scales with screen */
+        text-align: center;
+        pointer-events: none;
+        user-select: none;
     }
+
   </style>
 </head>
 <body>
