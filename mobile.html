@@ -5,72 +5,87 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Napoleon Card Game - Mobile</title>
   <style>
-    body {
-      background-color: #2E7D32;
-      color: white;
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-    }
-    h1 {
-      text-align: center;
-      font-size: 6vw;
-      margin: 10px 0;
-    }
-    #board {
-      display: flex;
-      justify-content: center;
-      gap: 5vw;
-      padding: 10px;
-      flex-wrap: wrap;
-    }
-    .column {
-      position: relative;
-      width: 28vw;
-      height: 100vh;
-      border: 2px solid #1B5E20;
-      background-color: #388E3C;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .card {
-      width: 24vw;
-      height: 34vw;
-      background: white;
-      border-radius: 8px;
-      color: black;
-      position: absolute;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      font-size: 5vw;
-      box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
-      user-select: none;
-      touch-action: none;
-      padding: 1vw;
-      box-sizing: border-box;
-    }
-    .card.red {
-      color: red;
-    }
-    .corner {
-      font-size: 5vw;
-      font-weight: bold;
-    }
-    .top-left {
-      align-self: flex-start;
-    }
-    .bottom-right {
-      align-self: flex-end;
-      transform: rotate(180deg);
-    }
-    .center-suit {
-      font-size: 10vw;
-      text-align: center;
-      pointer-events: none;
-    }
-  </style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #2E7D32;
+    color: white;
+    font-family: sans-serif;
+    overflow-x: hidden;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 6vw;
+    margin: 10px 0;
+  }
+
+  #board {
+    display: flex;
+    justify-content: center;
+    gap: 2vw;
+    padding: 2vw;
+    overflow-x: visible;
+    width: 100vw;
+    box-sizing: border-box;
+  }
+
+  .column {
+    position: relative;
+    flex: 1;
+    min-width: 28vw;
+    height: calc(100vh - 10vw);
+    background-color: #388E3C;
+    border: 2px solid #1B5E20;
+    border-radius: 8px;
+    overflow: visible;
+  }
+
+  .card {
+    width: 24vw;
+    height: 34vw;
+    background: white;
+    border-radius: 8px;
+    color: black;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 5vw;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+    user-select: none;
+    touch-action: none;
+    padding: 1vw;
+    box-sizing: border-box;
+  }
+
+  .card.red {
+    color: red;
+  }
+
+  .corner {
+    font-size: 5vw;
+    font-weight: bold;
+  }
+
+  .top-left {
+    align-self: flex-start;
+  }
+
+  .bottom-right {
+    align-self: flex-end;
+    transform: rotate(180deg);
+  }
+
+  .center-suit {
+    font-size: 10vw;
+    text-align: center;
+    pointer-events: none;
+  }
+</style>
+
 </head>
 <body>
   <h1>Napoleon</h1>
