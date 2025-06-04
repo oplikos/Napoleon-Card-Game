@@ -6,88 +6,87 @@
   <title>Napoleon Card Game - Mobile</title>
   <style>
     html, body {
-        margin: 0;
-        padding: 0;
-        background-color: #2E7D32;
-        color: white;
-        font-family: sans-serif;
-        overflow: hidden;
-        width: 100vw; /* Screen width is 100% of viewport */
-        height: 100vh; /* Screen height is 100% of viewport */
+      margin: 0;
+      padding: 0;
+      background-color: #2E7D32;
+      color: white;
+      font-family: sans-serif;
+      overflow: hidden;
+      width: 100vw; /* Use full screen width */
+      height: 100vh; /* Use full screen height */
     }
 
     h1 {
-        text-align: center;
-        font-size: 6vw; /* Scales with screen width */
-        margin: 10px 0;
+      text-align: center;
+      font-size: 6vw; /* Responsive font size */
+      margin: 10px 0;
     }
 
     #board {
-        display: flex;
-        justify-content: space-around; /* Adds gaps between and around columns */
-        align-items: flex-end;
-        width: 100vw; /* Full screen width */
-        height: calc(100vh - 12vw); /* Full screen height minus space for title */
-        box-sizing: border-box;
-        padding: 0 4vw; /* Left and right gaps from screen edge */
+      display: flex;
+      justify-content: space-around; /* Gap between columns and sides */
+      align-items: flex-end;
+      width: 100vw; /* Full width */
+      height: calc(100vh - 12vw); /* Allow room for title */
+      box-sizing: border-box;
+      padding: 0 4vw; /* Left/right margin from screen edge */
     }
 
     .column {
-        position: relative;
-        flex: 1 1 30vw; /* Grow/shrink columns responsively */
-        max-width: 30vw; /* Max column width */
-        height: 100%;
-        background-color: #388E3C;
-        border: 2px solid #1B5E20;
-        border-radius: 8px;
-        margin: 0 1vw;
-        overflow: visible;
+      position: relative;
+      flex: 1 1 30vw; /* Responsive width */
+      max-width: 30vw; /* Prevent growing too large */
+      height: 100%;
+      background-color: #388E3C;
+      border: 2px solid #1B5E20;
+      border-radius: 8px;
+      margin: 0 1vw; /* Gap between columns */
+      overflow: visible;
     }
 
     .card {
-        width: 24vw;      /* Card width in vw units – controls overall scaling */
-        height: 34vw;     /* Card height in vw units – controls vertical scaling */
-        background: white;
-        border-radius: 8px;
-        color: black;
-        position: absolute;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        font-size: 5vw;    /* Card font scales with screen */
-        box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
-        user-select: none;
-        touch-action: none;
-        padding: 1vw;
-        box-sizing: border-box;
-        transition: top 0.3s, left 0.3s;
+      width: 24vw;      /* Card width – scales with screen */
+      height: 34vw;     /* Card height – scales with screen */
+      background: white;
+      border-radius: 8px;
+      color: black;
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 5vw;    /* Text scales with screen */
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+      user-select: none;
+      touch-action: none;
+      padding: 1vw;
+      box-sizing: border-box;
+      transition: top 0.3s, left 0.3s;
     }
 
     .card.red {
-        color: red;
+      color: red;
     }
 
     .corner {
-        font-size: 5vw; /* Font size in card corners */
-        font-weight: bold;
+      font-size: 5vw;
+      font-weight: bold;
     }
 
     .top-left {
-        align-self: flex-start;
+      align-self: flex-start;
     }
 
     .bottom-right {
-        align-self: flex-end;
-        transform: rotate(180deg);
+      align-self: flex-end;
+      transform: rotate(180deg);
     }
 
     .center-suit {
-        font-size: 10vw; /* Suit in center scales with screen */
-        text-align: center;
-        pointer-events: none;
-        user-select: none;
+      font-size: 10vw;
+      text-align: center;
+      pointer-events: none;
+      user-select: none;
     }
-
   </style>
 </head>
 <body>
@@ -101,10 +100,11 @@
   <script>
     const suits = ['♠', '♥', '♦', '♣'];
     const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-    const cardWidth = 24; // vw units
-    const cardHeight = 34; // vw units
-    const verticalGap = 2; // vw units
-    const horizontalShift = 8; // vw units for stacking left/right
+
+    const cardWidth = 24; // vw – width of each card
+    const cardHeight = 34; // vw – height of each card
+    const verticalGap = 2; // vw – spacing between rows
+    const horizontalShift = 8; // vw – horizontal offset for stacking
 
     let boardRows = Array.from({ length: 5 }, () => ({
       left: [], middle: [], right: []
@@ -165,29 +165,27 @@
         <div class="center-suit">${card.suit}</div>
         <div class="corner bottom-right">${card.rank}${card.suit}</div>
       `;
+
       div.dataset.rank = card.rank;
       div.dataset.suit = card.suit;
       div.dataset.row = row;
       div.dataset.col = col;
       div.dataset.index = idx;
 
-      // Vertical positioning: cards stacked bottom to top (row 4 is bottom)
       const topPos = (4 - row) * (cardHeight + verticalGap);
       div.style.top = topPos + 'vw';
 
-      // Horizontal positioning based on column and stack index
       if (col === 'middle') {
-        div.style.left = (12 - cardWidth / 2) + 'vw'; // center horizontally approx
+        div.style.left = 'calc(50% - ' + (cardWidth / 2) + 'vw)'; // center card
       } else if (col === 'left') {
         div.style.left = (2 - idx * horizontalShift) + 'vw';
-      } else { // right
+      } else {
         div.style.left = (2 + idx * horizontalShift) + 'vw';
       }
 
       div.style.zIndex = 1000 + idx;
       div.draggable = false;
 
-      // Enable touch drag only on top card of stack
       if (idx === boardRows[row][col].length - 1) {
         enableTouchDrag(div);
       }
@@ -271,7 +269,6 @@
       const targetStack = boardRows[targetRow][targetCol];
 
       if (targetStack.length === 0) {
-        // Middle empty stack accepts only Aces
         if (targetCol === 'middle') return movingCard.rank === 'A';
         return true;
       } else {
@@ -299,47 +296,6 @@
         });
       }
     }
-
-    // Add drag-and-drop support for desktop too (optional)
-    let draggedCardInfo = null;
-
-    document.querySelectorAll('.column').forEach(colDiv => {
-      colDiv.addEventListener('dragover', e => e.preventDefault());
-      colDiv.addEventListener('drop', e => {
-        e.preventDefault();
-        if (!draggedCardInfo) return;
-        const targetCol = colDiv.dataset.col;
-        const rect = colDiv.getBoundingClientRect();
-        const y = e.clientY - rect.top;
-        let targetRow = 4 - Math.floor(y / (cardHeight * window.innerWidth / 100));
-        if (targetRow < 0) targetRow = 0;
-        if (targetRow > 4) targetRow = 4;
-
-        if (isValidMove(draggedCardInfo, targetCol, targetRow)) {
-          moveCard(draggedCardInfo, targetCol, targetRow);
-          renderBoard();
-        }
-        draggedCardInfo = null;
-      });
-    });
-
-    function onDragStart(e) {
-      const el = e.target.closest('.card');
-      if (!el) return;
-      draggedCardInfo = {
-        row: Number(el.dataset.row),
-        col: el.dataset.col,
-        stackIndex: Number(el.dataset.index),
-        card: {
-          suit: el.dataset.suit,
-          rank: el.dataset.rank,
-          value: ranks.indexOf(el.dataset.rank) + 1
-        }
-      };
-      e.dataTransfer.effectAllowed = "move";
-    }
-
-    document.body.addEventListener('dragstart', onDragStart);
 
     renderBoard();
   </script>
