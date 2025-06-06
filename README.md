@@ -1,4 +1,4 @@
-# Napoleon-Card-Game built using Chat-GPT in less than one hour 
+# Napoleon-Card-Game  
 
 Distribution rules you want:
 

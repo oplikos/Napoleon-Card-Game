@@ -491,7 +491,7 @@
             });
         }
     }
-let touchStartY = 0;
+let touchPreview = null;
 
 function touchStart(e) {
   e.preventDefault();
@@ -512,10 +512,33 @@ function touchStart(e) {
     }
   };
 
+  // Create preview card that follows touch
+  touchPreview = el.cloneNode(true);
+  touchPreview.style.position = 'fixed';
+  touchPreview.style.left = (touch.clientX - 50) + 'px';
+  touchPreview.style.top = (touch.clientY - 70) + 'px';
+  touchPreview.style.pointerEvents = 'none';
+  touchPreview.style.opacity = '0.8';
+  touchPreview.style.zIndex = '9999';
+  document.body.appendChild(touchPreview);
+
+  document.addEventListener('touchmove', touchMove, { passive: false });
   document.addEventListener('touchend', touchEnd, { once: true });
 }
 
+function touchMove(e) {
+  if (!touchPreview) return;
+  const touch = e.touches[0];
+  touchPreview.style.left = (touch.clientX - 50) + 'px';
+  touchPreview.style.top = (touch.clientY - 70) + 'px';
+}
+
 function touchEnd(e) {
+  if (touchPreview) {
+    document.body.removeChild(touchPreview);
+    touchPreview = null;
+  }
+
   if (!draggedCardInfo) return;
 
   const touch = e.changedTouches[0];
@@ -546,10 +569,11 @@ function touchEnd(e) {
     checkSolved();
   }
 
+  document.removeEventListener('touchmove', touchMove);
   draggedCardInfo = null;
 }
-
-  renderBoard();
+    renderBoard();
+    checkSolved();
 </script>
 
 </body>
