@@ -154,6 +154,8 @@
   <button onclick="undoLastMove()">⬅️ Back</button>
   <button onclick="resetToInitial()">🔄 Reset</button>
   <button onclick="restartGame()">🔁 Restart</button>
+  <button onclick="highlightMovableCards()">💡 Hint</button>
+
 </div>
 <div id="solved-message">SOLVED!!</div>
 
@@ -384,8 +386,13 @@
     }
     
     function restartGame() {
-        location.reload();
+        boardRows = Array.from({ length: 5 }, () => ({ left: [], middle: [], right: [] }));
+        moveHistory = [];
+        dealCards();
+        hideSolved();
+        renderBoard();
     }
+
     function checkSolved() {
         const solved = boardRows.every(row =>
             row.left.length === 0 &&
@@ -408,6 +415,49 @@
         msg.style.display = 'none';
         msg.style.animation = 'none';
     }
+    function highlightMovableCards() {
+        document.querySelectorAll('.card').forEach(c => {
+            c.style.outline = '';
+            c.style.backgroundColor = '';
+        });
+
+        const suitColors = {
+            '♥': 'rgba(255, 0, 0, 0.3)',      // Red
+            '♦': 'rgba(255, 165, 0, 0.3)',    // Orange
+            '♠': 'rgba(0, 200, 255, 0.3)',    // Light Blue
+            '♣': 'rgba(50, 205, 50, 0.3)'     // Light Green
+        };
+
+        for (let row = 0; row < 5; row++) {
+            ['left', 'right'].forEach(col => {
+                const stack = boardRows[row][col];
+                if (stack.length === 0) return;
+
+                const topCard = stack[stack.length - 1];
+                const cardValue = ranks.indexOf(topCard.rank) + 1;
+
+                ['left', 'middle', 'right'].forEach(targetCol => {
+                    if (isValidMove({
+                        card: topCard,
+                        row,
+                        col,
+                        stackIndex: stack.length - 1
+                    }, targetCol, row)) {
+                        const el = [...document.querySelectorAll('.card')].find(e =>
+                            e.dataset.rank === topCard.rank &&
+                            e.dataset.suit === topCard.suit &&
+                            e.dataset.row == row
+                        );
+                        if (el) {
+                            el.style.outline = '4px solid';
+                            el.style.backgroundColor = suitColors[topCard.suit] || 'rgba(255,255,255,0.3)';
+                        }
+                    }
+                });
+            });
+        }
+    }
+
 
     function renderBoard() {
       [leftColDiv, middleColDiv, rightColDiv].forEach(colDiv => colDiv.innerHTML = '');

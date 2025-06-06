@@ -94,7 +94,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 800px) {
   body {
     overflow-x: hidden;
   }
@@ -134,6 +134,7 @@
     width: 14vw;
     height: 20vw;
     font-size: 4vw;
+    touch-action: none;
   }
 
   .corner {
@@ -293,6 +294,7 @@
 
     if (isTopCard) {
       cardDiv.addEventListener('dragstart', dragStart);
+      cardDiv.addEventListener('touchstart', touchStart, { passive: false });
     }
 
     return cardDiv;
@@ -399,8 +401,13 @@
     }
     
     function restartGame() {
-        location.reload();
+        boardRows = Array.from({ length: 5 }, () => ({ left: [], middle: [], right: [] }));
+        moveHistory = [];
+        dealCards();
+        hideSolved();
+        renderBoard();
     }
+
     function checkSolved() {
         const solved = boardRows.every(row =>
             row.left.length === 0 &&
@@ -442,6 +449,105 @@
       });
     }
   }
+   function highlightMovableCards() {
+        document.querySelectorAll('.card').forEach(c => {
+            c.style.outline = '';
+            c.style.backgroundColor = '';
+        });
+
+        const suitColors = {
+            '♥': 'rgba(255, 0, 0, 0.3)',      // Red
+            '♦': 'rgba(255, 165, 0, 0.3)',    // Orange
+            '♠': 'rgba(0, 200, 255, 0.3)',    // Light Blue
+            '♣': 'rgba(50, 205, 50, 0.3)'     // Light Green
+        };
+
+        for (let row = 0; row < 5; row++) {
+            ['left', 'right'].forEach(col => {
+                const stack = boardRows[row][col];
+                if (stack.length === 0) return;
+
+                const topCard = stack[stack.length - 1];
+                const cardValue = ranks.indexOf(topCard.rank) + 1;
+
+                ['left', 'middle', 'right'].forEach(targetCol => {
+                    if (isValidMove({
+                        card: topCard,
+                        row,
+                        col,
+                        stackIndex: stack.length - 1
+                    }, targetCol, row)) {
+                        const el = [...document.querySelectorAll('.card')].find(e =>
+                            e.dataset.rank === topCard.rank &&
+                            e.dataset.suit === topCard.suit &&
+                            e.dataset.row == row
+                        );
+                        if (el) {
+                            el.style.outline = '4px solid';
+                            el.style.backgroundColor = suitColors[topCard.suit] || 'rgba(255,255,255,0.3)';
+                        }
+                    }
+                });
+            });
+        }
+    }
+let touchStartY = 0;
+
+function touchStart(e) {
+  e.preventDefault();
+  const el = e.target.closest('.card');
+  if (!el) return;
+
+  const touch = e.touches[0];
+  touchStartY = touch.clientY;
+
+  draggedCardInfo = {
+    row: Number(el.dataset.row),
+    col: el.dataset.column,
+    stackIndex: Number(el.dataset.stackIndex),
+    card: {
+      suit: el.dataset.suit,
+      rank: el.dataset.rank,
+      value: ranks.indexOf(el.dataset.rank) + 1
+    }
+  };
+
+  document.addEventListener('touchend', touchEnd, { once: true });
+}
+
+function touchEnd(e) {
+  if (!draggedCardInfo) return;
+
+  const touch = e.changedTouches[0];
+  const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
+  const colDiv = elements.find(el => el.classList.contains('column'));
+  if (!colDiv) return;
+
+  const targetCol = colDiv.dataset.col;
+  const rect = colDiv.getBoundingClientRect();
+  const y = touch.clientY - rect.top;
+
+  let targetRow = 4 - Math.floor(y / cardHeight);
+  if (targetRow < 0) targetRow = 0;
+  if (targetRow > 4) targetRow = 4;
+
+  if (isValidMove(draggedCardInfo, targetCol, targetRow)) {
+    const fromCol = draggedCardInfo.col;
+    const toCol = targetCol;
+    const row = targetRow;
+
+    const stack = boardRows[draggedCardInfo.row][fromCol];
+    const card = stack.pop();
+
+    boardRows[row][toCol].push(card);
+    moveHistory.push({ fromCol, toCol, row, card });
+
+    renderBoard();
+    checkSolved();
+  }
+
+  draggedCardInfo = null;
+}
 
   renderBoard();
 </script>
