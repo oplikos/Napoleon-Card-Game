@@ -1,0 +1,147 @@
+  body {
+    background-color: #2E7D32;
+    color: white;
+    font-family: sans-serif;
+    text-align: center;
+    margin: 20px;
+  }
+  #board {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 10px;
+  }
+  .column {
+    position: relative;
+    width: 200px;
+    height: 800px;
+    border: 2px solid #1B5E20;
+    background-color: #388E3C;
+    border-radius: 8px;
+    padding-top: 10px;
+  }
+  .card {
+    width: 100px;
+    height: 140px;
+    background: white;
+    border-radius: 8px;
+    color: black;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 28px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+    user-select: none;
+    cursor: pointer;
+    transition: top 0.2s, left 0.2s;
+    padding: 5px;
+    box-sizing: border-box;
+  }
+  .card.red {
+    color: red;
+  }
+  .corner {
+    font-size: 24px;      /* bigger font for corner numbers */
+    font-weight: bold;
+    line-height: 1;
+  }
+  
+  .top-left {
+    align-self: flex-start;
+  }
+  .bottom-right {
+    align-self: flex-end;
+    /* transform: rotate(180deg); */
+  }
+  .center-suit {
+    font-size: 64px;
+    text-align: center;
+    line-height: 1;
+    user-select: none;
+    pointer-events: none;
+  }
+  
+ 
+    @media (min-width: 768px) {
+  #controls button {
+    font-size: 18px;
+    padding: 10px 20px;
+  }
+
+  .column {
+    width: 160px;
+    height: 800px;
+  }
+
+  .card {
+    width: 80px;
+    height: 112px;
+    font-size: 22px;
+  }
+
+  .corner {
+    font-size: 18px;
+  }
+
+  .center-suit {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 800px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  #board {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .column {
+    width: 16.6666vw; /* 1/6 of screen */
+    height: auto;
+    min-height: 600px;
+    position: relative;
+    border: 1px solid #1B5E20;
+    background-color: #388E3C;
+  }
+
+  #left-column {
+    flex: 1;
+  }
+
+  #middle-column {
+    flex: 4;
+    min-width: 66.6666vw; /* 4/6 width */
+    max-width: 66.6666vw;
+  }
+
+  #right-column {
+    flex: 1;
+  }
+
+  .card {
+    width: 14vw;
+    height: 20vw;
+    font-size: 4vw;
+    touch-action: none;
+  }
+
+  .corner {
+    font-size: 3vw;
+  }
+
+  .center-suit {
+    font-size: 6vw;
+  }
+
+  #controls button {
+    font-size: 5vw;
+    padding: 2vw 3vw;
+  }
+}

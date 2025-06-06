@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Responsive Card Game</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<h1>Napoleon Card Game - PC</h1>
+<div id="controls">
+  <button onclick="undoLastMove()">⬅️ Back</button>
+  <button onclick="resetToInitial()">🔄 Reset</button>
+  <button onclick="restartGame()">🔁 Restart</button>
+    <button id="hint-button">Hint</button>
+</div>
+<div id="solved-message">SOLVED!!</div>
+
+<div id="board">
+  <div id="left-column" class="column" data-col="left"></div>
+  <div id="middle-column" class="column" data-col="middle"></div>
+  <div id="right-column" class="column" data-col="right"></div>
+</div>
+
+
+  <script src="script.js"></script>
+</body>
+</html>
